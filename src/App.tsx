@@ -1,26 +1,42 @@
-import React from "react";
-import logo from "./logo.svg";
-import "./App.css";
+import React, {useState} from "react";
+import jmsepath from "jmespath";
+
+import JSONDataInput from "components/JSONDataInput";
+import QueryInput from "components/QueryInput";
+import ErrorStatus from "components/ErrorStatus";
+import TableView from "components/views/TableView";
+import json from "json"
+
+import "App.css";
+
+
+function extract(query: string, data: string): [json|null, Error|null] {
+    try {
+        return [jmsepath.search(JSON.parse(data), query) as json, null];
+    } catch (err) {
+        if (err instanceof Error) {
+            return [null, err];
+        }
+
+        throw err;
+    }
+}
+
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    const [query, setQuery] = useState("foo[*].first");
+    const [data, setData] = useState('{"foo": [{"first": "a", "last": "b"}, {"first": "c", "last": "d"}]}');
+
+    const [result, error] = extract(query, data);
+
+    return (
+        <div className="App">
+            <QueryInput value={query} onChange={setQuery} />
+            <JSONDataInput value={data} onChange={setData} />
+            <TableView data={result} />
+            <ErrorStatus error={error} />
+        </div>
+    );
 }
 
 export default App;
