@@ -3,16 +3,15 @@ import jmsepath from "jmespath";
 
 import JSONDataInput from "components/JSONDataInput";
 import QueryInput from "components/QueryInput";
-import ErrorStatus from "components/ErrorStatus";
-import TableView from "components/views/TableView";
+import parseChartDescriptions from "parseChartDescriptions";
 import json from "json"
 
 import "App.css";
 
 
-function extract(query: string, data: string): [json|null, Error|null] {
+function splitError<T>(func: () => T): [T, null] | [null, Error] {
     try {
-        return [jmsepath.search(JSON.parse(data), query) as json, null];
+        return [func(), null];
     } catch (err) {
         if (err instanceof Error) {
             return [null, err];
@@ -24,19 +23,38 @@ function extract(query: string, data: string): [json|null, Error|null] {
 
 
 function App() {
-    const [query, setQuery] = useState("foo[*].first");
-    const [data, setData] = useState('{"foo": [{"first": "a", "last": "b"}, {"first": "c", "last": "d"}]}');
+    const [query, setQuery] = useState("[foo[*].first, foo[*].last]");
+    const [rawData, setRawData] = useState('{"foo": [{"first": 1, "last": 2}, {"first": 3, "last": 4}]}');
 
-    const [result, error] = extract(query, data);
+    const [data, jsonParseError] = splitError(function() {
+        return JSON.parse(rawData) as json;
+    });
+
+    const [chartDescription, queryParseError] = splitError(function() {
+        return jmsepath.search(data, query) as json;
+    });
+
+    const [chart, descriptionParseError] = splitError(function() {
+        return parseChartDescriptions(chartDescription);
+    });
 
     return (
         <div className="App">
-            <QueryInput value={query} onChange={setQuery} />
-            <JSONDataInput value={data} onChange={setData} />
-            <TableView data={result} />
-            <ErrorStatus error={error} />
+            <QueryInput
+                value={query}
+                onChange={setQuery}
+                error={queryParseError}
+            />
+            <JSONDataInput
+                value={rawData}
+                onChange={setRawData}
+                error={jsonParseError}
+            />
+            <pre>{chartDescription && JSON.stringify(chartDescription)}</pre>
+            <pre>{chart && JSON.stringify(chart)}</pre>
         </div>
     );
 }
+
 
 export default App;
