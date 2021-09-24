@@ -1,4 +1,4 @@
-import json from "json";
+import {JsonValue} from "type-fest";
 
 
 class Series {
@@ -12,7 +12,7 @@ export class Chart {
 }
 
 
-function parseChartDescriptions(data: json) {
+function parseChartDescriptions(data: JsonValue) {
 	const valid = (
 		Array.isArray(data) &&
 		data.length === 2 &&
