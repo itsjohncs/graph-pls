@@ -4,6 +4,7 @@ import jmsepath from "jmespath";
 import JSONDataInput from "components/JSONDataInput";
 import QueryInput from "components/QueryInput";
 import parseChartDescriptions from "parseChartDescriptions";
+import json from "json"
 
 import "App.css";
 
@@ -26,11 +27,11 @@ function App() {
     const [rawData, setRawData] = useState('{"foo": [{"first": 1, "last": 2}, {"first": 3, "last": 4}]}');
 
     const [data, jsonParseError] = splitError(function() {
-        return JSON.parse(rawData);
+        return JSON.parse(rawData) as json;
     });
 
     const [chartDescription, queryParseError] = splitError(function() {
-        return jmsepath.search(data, query);
+        return jmsepath.search(data, query) as json;
     });
 
     const [chart, descriptionParseError] = splitError(function() {
