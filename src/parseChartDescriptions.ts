@@ -1,6 +1,3 @@
-import json from "json";
-
-
 class Series {
 	x: number[] | string[] = [];
 	y: number[] = [];
@@ -12,7 +9,7 @@ export class Chart {
 }
 
 
-function parseChartDescriptions(data: json) {
+function parseChartDescriptions(data: JSONValue) {
 	const valid = (
 		Array.isArray(data) &&
 		data.length === 2 &&
